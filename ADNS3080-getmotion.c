@@ -27,7 +27,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 // mavlink
-#include <mavlink.h>
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -364,30 +363,9 @@ int main(int argc, char *argv[])
   struct sockaddr_in server_addr;
   struct hostent *host;
 
-  // setup mavlink
+  // setup
   int cnt;
   int txbytes;
-  uint8_t mav_tx_buf[MAVLINK_MAX_PACKET_LEN];
-  static mavlink_message_t msg;
-  static mavlink_message_t msg_hb;
-  // mavlink_huch_potibox_t potibox;
-  // mavlink_attitude_t attitude;
-  mavlink_huch_visual_flow_t flow;
-  mavlink_huch_visual_oflow_sen_t of_sen;
-  uint16_t len;
-
-#if (defined MAVLINK_VERSION && MAVLINK_VERSION >= 2)
-  printf("prepping mavlink heartbeat\n");
-  mavlink_msg_heartbeat_pack(SYSID, // system_id
-                             35, // component_id,
-                             &msg_hb,
-                             MAV_TYPE_GENERIC, // mav_type,
-                             MAV_AUTOPILOT_GENERIC, // autopilot,
-                             MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,  //base mode
-                             0, //custom mode
-                             MAV_STATE_ACTIVE);   //system status
-#endif
-  len = mavlink_msg_to_send_buffer(mav_tx_buf, &msg_hb);
 
   // setup socket, init network
   host = (struct hostent *) gethostbyname((char *)DST_HOST);
@@ -471,32 +449,32 @@ int main(int argc, char *argv[])
     printf("squal,dx,dy: %d, %d, %d\n", squal, dx, dy);
 
     // transmit via mavlink
-    flow.usec = 0;
-    flow.u = (float)dx;
-    flow.v = (float)dy;
-    flow.u_i = (float)squal;
+    // flow.usec = 0;
+    // flow.u = (float)dx;
+    // flow.v = (float)dy;
+    // flow.u_i = (float)squal;
 
-	of_sen.id = 0;
-	of_sen.u = (float)dx;
-	of_sen.v = (float)dy;
-	of_sen.squal = (float)squal;
+    // of_sen.id = 0;
+    // of_sen.u = (float)dx;
+    // of_sen.v = (float)dy;
+    // of_sen.squal = (float)squal;
 
     // prepare for transmission
     // mavlink_msg_huch_visual_flow_encode(SYSID, 35, &msg, &flow);
     // len = mavlink_msg_to_send_buffer(mav_tx_buf, &msg);
-    mavlink_msg_huch_visual_oflow_sen_encode(SYSID, 35, &msg, &of_sen);
-    len = mavlink_msg_to_send_buffer(mav_tx_buf, &msg);
+    // mavlink_msg_huch_visual_oflow_sen_encode(SYSID, 35, &msg, &of_sen);
+    // len = mavlink_msg_to_send_buffer(mav_tx_buf, &msg);
     // transmit data
-    txbytes = sendto(sock, mav_tx_buf, len, 0,
-                     (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
+    // txbytes = sendto(sock, mav_tx_buf, len, 0,
+    //                  (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
 
     //if (buf[0]=='z') STOP=TRUE;
-    if((cnt % 100) == 0) {
-      len = mavlink_msg_to_send_buffer(mav_tx_buf, &msg_hb);
-      txbytes = sendto(sock, mav_tx_buf, len, 0,
-                       (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
-      printf("sent heartbeat: %d|%d\n", len, txbytes);
-    }
+    // if((cnt % 100) == 0) {
+    //   len = mavlink_msg_to_send_buffer(mav_tx_buf, &msg_hb);
+    //   txbytes = sendto(sock, mav_tx_buf, len, 0,
+    //                    (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
+    //   printf("sent heartbeat: %d|%d\n", len, txbytes);
+    // }
 
     transfer_motion_clear(fd);
     cnt++;
